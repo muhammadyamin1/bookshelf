@@ -8,14 +8,6 @@ body, input, button {
     font-family: 'Open Sans', sans-serif;
 }
 
-input, button {
-    font-size: 16px;
-}
-
-input.form-control {
-    border: 1px solid #007bffe3; /* Warna border yang lebih jelas */
-}
-
 .head_bar {
     padding: 12px;
     display: flex;
@@ -32,11 +24,26 @@ main {
     padding: 16px;
 }
 
-.input_section, .search_section, .book_shelf {
+/* Default untuk desktop */
+.input_section {
+    padding: 16px 160px;
+    border: 1px solid black;
+    border-radius: 10px;
+    margin-bottom: 16px;
+}
+
+.search_section, .book_shelf {
     padding: 16px;
     border: 1px solid black;
     border-radius: 10px;
     margin-bottom: 16px;
+}
+
+/* Untuk layar HP (≤ 575.98px), semua padding jadi 16px */
+@media (max-width: 575.98px) {
+    .input_section {
+        padding: 16px;
+    }
 }
 
 .input_section > h2, .search_section > h2, .book_shelf > h2 {

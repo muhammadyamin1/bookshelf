@@ -135,7 +135,6 @@ function createButton(buttonTypeClass, innerText, eventListener) {
 }
 
 function addBook() {
-
     const incompleteBookshelfList = document.getElementById("incompleteBookshelfList");
     const completeBookshelfList = document.getElementById("completeBookshelfList");
 
@@ -144,27 +143,29 @@ function addBook() {
     const tahun = document.getElementById("inputBookYear").value;
     const konfir = document.getElementById("inputBookIsComplete");
 
+    const book = makeBook(judul, penulis, tahun, konfir.checked);
+    const bookObject = composeBookObject(judul, penulis, tahun, konfir.checked);
+
+    book[BOOK_ITEMID] = bookObject.id;
+    books.push(bookObject);
+
     if (konfir.checked) {
-        const isComplete = true;
-        const book = makeBook(judul, penulis, tahun, konfir);
-        const bookObject = composeBookObject(judul, penulis, tahun, isComplete);
-
-        book[BOOK_ITEMID] = bookObject.id;
-        books.push(bookObject);
-
         completeBookshelfList.append(book);
     } else {
-        const isComplete = false;
-        const book = makeBook(judul, penulis, tahun, konfir);
-        const bookObject = composeBookObject(judul, penulis, tahun, isComplete);
-
-        book[BOOK_ITEMID] = bookObject.id;
-        books.push(bookObject);
-
         incompleteBookshelfList.append(book);
     }
 
     updateDataToStorage();
+
+    // Show SweetAlert2 confirmation
+    Swal.fire({
+        title: 'Berhasil!',
+        text: 'Buku berhasil ditambahkan.',
+        icon: 'success',
+        confirmButtonText: 'OK'
+    }).then(() => {
+        document.getElementById("inputBook").reset();
+    });
 }
 
 function moveBookToCompletedRead(bookElement) {
@@ -204,11 +205,30 @@ function moveBookToUncompletedRead(bookElement) {
 }
 
 function removeBook(bookElement) {
-    const bookPosition = findBookIndex(bookElement.parentElement[BOOK_ITEMID]);
-    books.splice(bookPosition, 1);
+    Swal.fire({
+        title: 'Apakah kamu yakin ingin menghapus buku ini?',
+        text: "Kamu tidak dapat mengembalikannya lagi setelah dihapus!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, saya yakin!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const bookPosition = findBookIndex(bookElement.parentElement[BOOK_ITEMID]);
+            books.splice(bookPosition, 1);
 
-    bookElement.parentElement.remove();
-    updateDataToStorage();
+            bookElement.parentElement.remove();
+            updateDataToStorage();
+
+            Swal.fire(
+                'Dihapus!',
+                'Bukumu berhasil dihapus.',
+                'success'
+            );
+        }
+    });
 }
 
 function refreshDataFromBooks() {
@@ -231,7 +251,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     submitForm.addEventListener("submit", function (event) {
         event.preventDefault();
-        console.log("Form succesfully submitted with JavaScript");
         addBook();
     });
 
@@ -241,17 +260,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Add event listener for search input
     const searchInput = document.getElementById("searchBookTitle");
-    searchInput.addEventListener("input", function (event) {
-        const query = event.target.value.toLowerCase();
-        filterBooks(query);
-    });
+    if (searchInput) {
+        searchInput.addEventListener("input", function (event) {
+            const query = event.target.value.toLowerCase();
+            filterBooks(query);
+        });
+    }
 
     // Add event listener for clear search button
     const clearSearchButton = document.getElementById("clearSearch");
-    clearSearchButton.addEventListener("click", function () {
-        searchInput.value = '';
-        filterBooks('');
-    });
+    if (clearSearchButton) {
+        clearSearchButton.addEventListener("click", function () {
+            if (searchInput) {
+                searchInput.value = '';
+                filterBooks('');
+            }
+        });
+    }
 });
 
 function filterBooks(query) {
